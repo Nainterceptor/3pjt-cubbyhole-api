@@ -26,6 +26,8 @@ node_modules
 .idea/dataSources.xml
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
+.idea/mongoSettings.xml
+.idea/runConfigurations
 
 ## File-based project format
 *.ipr
@@ -35,3 +37,4 @@ node_modules
 out/
 
 #Cover cubbyhole api
+config/config.js

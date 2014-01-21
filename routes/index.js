@@ -5,7 +5,8 @@
 
 exports.index = function(req, res){
     var json = {
-        serverStatus: 'I\'m alive !'
+        success: true,
+        message: 'I\'m alive !'
     };
     res.json(json);
 };

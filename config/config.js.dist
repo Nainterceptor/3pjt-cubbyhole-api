@@ -1,0 +1,7 @@
+module.exports = {
+    development: {
+        db: 'mongodb://localhost/cubbyhole'
+    },
+    test: {},
+    production: {}
+}
