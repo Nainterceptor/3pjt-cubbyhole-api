@@ -14,9 +14,8 @@ var schema = mongoose.Schema;
 var userSchema;
 userSchema = new schema({
     email: { type: String, required: true },
-    hashed_password: { type: String },
-    salt: { type: String },
-    authToken: { type: String }
+    hashed_password: { type: String, required: true },
+    salt: { type: String }
 });
 
 /**
@@ -31,19 +30,6 @@ userSchema
     })
     .get(function() { return this._password });
 
-/**
- * Validators
- */
-userSchema.path('email').validate(function (email, fn) {
-    var User = mongoose.model('User')
-        // Check only when it is a new user or when email field is modified
-        if (this.isNew || this.isModified('email')) {
-            User.find({ email: email }).exec(function (err, users) {
-                fn(!err && users.length === 0)
-            })
-        } else fn(true);
-}, 'validator.email.alreadyExist');
-
 userSchema.methods = {
     /**
      * Authenticate - check if the passwords are the same
@@ -55,6 +41,37 @@ userSchema.methods = {
 
     authenticate: function (plainText) {
         return this.encryptPassword(plainText) === this.hashed_password
+    },
+
+    /**
+     * Encrypt password
+     *
+     * @param {String} password
+     * @return {String}
+     * @api public
+     */
+
+    encryptPassword: function (password) {
+        if (!password)
+            return '';
+        var encrypted;
+        try {
+            encrypted = crypto.createHmac('sha1', this.salt).update(password).digest('hex');
+            return encrypted;
+        } catch (err) {
+            return '';
+        }
+    },
+    /**
+     * Make salt
+     *
+     * @return {String}
+     * @api public
+     */
+
+    makeSalt: function () {
+        return Math.round((new Date().valueOf() * Math.random())) + ''
     }
-}
+};
+require('../validators/userValidator.js')(userSchema);
 mongoose.model('User', userSchema);

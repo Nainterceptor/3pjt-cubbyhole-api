@@ -1,7 +1,8 @@
-var index = require('../routes/index');
-var user = require('../routes/user');
+var index = require('../routes/indexController');
+var user = require('../routes/userController');
 
 module.exports = function (app) {
     app.get('/', index.index);
-    app.put('/user/create', user.create);
+    app.put('/user/registration', user.create);
+    app.get('/user/get', user.getOne);
 };

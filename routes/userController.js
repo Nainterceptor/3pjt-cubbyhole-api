@@ -1,13 +1,16 @@
 var User = require('mongoose').model('User');
+var validatorHelper = require('../helpers/validator.js');
 /*
  * PUT user
  */
 
-exports.create = function(req, res){
+exports.create = function(req, res, next) {
     var user = new User(req.body);
     user.save(function(err) {
+        if (err)
         var result;
         if (err) {
+            validatorHelper.error(err);
             result = {
                 success: false,
                 errors: err.errors,
@@ -16,9 +19,16 @@ exports.create = function(req, res){
         } else {
             result = {
                 success: true,
-                message: 'user.create.success'
+                message: 'user.create.success',
+                user: user
             };
         }
         res.json(result);
+    });
+};
+
+exports.getOne = function(req, res, next) {
+    User.findOne(req.params).exec(function(err, doc) {
+        res.json(doc);
     });
 };
