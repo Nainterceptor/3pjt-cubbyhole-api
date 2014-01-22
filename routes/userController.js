@@ -1,5 +1,6 @@
 var User = require('mongoose').model('User');
 var validatorHelper = require('../helpers/validator.js');
+var jsonMask = require('json-mask');
 /*
  * PUT user
  */
@@ -20,7 +21,7 @@ exports.create = function(req, res, next) {
             result = {
                 success: true,
                 message: 'user.create.success',
-                user: user
+                user: jsonMask(user, user.gettables())
             };
         }
         res.json(result);
@@ -28,7 +29,12 @@ exports.create = function(req, res, next) {
 };
 
 exports.getOne = function(req, res, next) {
-    User.findOne(req.params).exec(function(err, doc) {
-        res.json(doc);
+    console.log(req.query);
+    var searchOn = jsonMask(req.query, User.searchable());
+    console.log(searchOn);
+    User.findOne(searchOn).exec(function(err, doc) {
+        res.json(
+            jsonMask(doc, User.gettables())
+        );
     });
 };

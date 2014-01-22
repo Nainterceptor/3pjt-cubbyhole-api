@@ -71,6 +71,13 @@ userSchema.methods = {
 
     makeSalt: function () {
         return Math.round((new Date().valueOf() * Math.random())) + ''
+    },
+
+    searchable: function() {
+        return 'email,_id';
+    },
+    gettables: function() {
+        return 'email,_id';
     }
 };
 require('../validators/userValidator.js')(userSchema);
