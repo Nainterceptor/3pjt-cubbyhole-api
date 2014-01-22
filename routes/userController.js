@@ -29,9 +29,7 @@ exports.create = function(req, res, next) {
 };
 
 exports.getOne = function(req, res, next) {
-    console.log(req.query);
     var searchOn = jsonMask(req.query, User.searchable());
-    console.log(searchOn);
     User.findOne(searchOn).exec(function(err, doc) {
         var user = jsonMask(doc, User.gettables());
         var result;
@@ -46,6 +44,28 @@ exports.getOne = function(req, res, next) {
                 message: 'user.one',
                 user: user
             }
+        }
+        res.json(result);
+    });
+
+};
+
+exports.remove = function(req, res, next) {
+    var searchOn = jsonMask(req.body, User.searchable());
+    User.findOneAndRemove(searchOn, function(err, doc) {
+        var user = jsonMask(doc, User.gettables());
+        var result;
+        if(doc == null) {
+            result = {
+                success: false,
+                message: 'user.notFound'
+            };
+        } else {
+            result = {
+                success: true,
+                message: 'user.deleted',
+                user: user
+            };
         }
         res.json(result);
     });
