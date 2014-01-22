@@ -21,7 +21,7 @@ exports.create = function(req, res, next) {
             result = {
                 success: true,
                 message: 'user.create.success',
-                user: jsonMask(user, user.gettables())
+                user: jsonMask(user, User.gettables())
             };
         }
         res.json(result);
@@ -33,8 +33,22 @@ exports.getOne = function(req, res, next) {
     var searchOn = jsonMask(req.query, User.searchable());
     console.log(searchOn);
     User.findOne(searchOn).exec(function(err, doc) {
-        res.json(
-            jsonMask(doc, User.gettables())
-        );
+        var user = jsonMask(doc, User.gettables());
+        var result;
+        if (user == null) {
+            result = {
+                success: false,
+                message: 'user.notFound'
+            }
+        } else {
+            result = {
+                success: true,
+                message: 'user.one',
+                user: user
+            }
+        }
+        res.json(result);
     });
+
 };
+
