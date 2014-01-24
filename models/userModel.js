@@ -13,9 +13,15 @@ var schema = mongoose.Schema;
 
 var userSchema;
 userSchema = new schema({
+    created: {
+        type: Date,
+        default: Date.now
+    },
     email: { type: String, required: true },
     hashed_password: { type: String, required: true },
-    salt: { type: String }
+    salt: { type: String },
+    token: { type: String },
+    tokenExpire: { type: Date }
 });
 
 /**
@@ -71,6 +77,15 @@ userSchema.methods = {
 
     makeSalt: function () {
         return Math.round((new Date().valueOf() * Math.random())) + ''
+    },
+
+    /**
+     * Check if token is not expired
+     * @return {Boolean}
+     * @api public
+     */
+    hasValidToken: function() {
+        return (new Date() <= this.tokenExpire);
     }
 };
 userSchema.statics = {

@@ -6,7 +6,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var http = require('http');
-var path = require('path');
+var passport = require('passport');
 var fs = require('fs');
 
 var app = express();
@@ -40,6 +40,8 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(express.bodyParser());
+require('./config/authentication')(passport);
+app.use(passport.initialize());
 app.use(app.router);
 
 // development only
@@ -48,7 +50,7 @@ if ('development' == app.get('env')) {
 }
 
 // Bootstrap routes
-require('./config/routes')(app);
+require('./config/routes')(app, passport);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
