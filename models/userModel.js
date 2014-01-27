@@ -21,7 +21,8 @@ userSchema = new schema({
     hashed_password: { type: String, required: true },
     salt: { type: String },
     token: { type: String },
-    tokenExpire: { type: Date }
+    tokenExpire: { type: Date },
+    admin: { type: Boolean }
 });
 
 /**
@@ -86,14 +87,26 @@ userSchema.methods = {
      */
     hasValidToken: function() {
         return (new Date() <= this.tokenExpire);
+    },
+    /**
+     * Check if user is admin
+     */
+    isAdmin: function() {
+        return this.admin == true;
     }
 };
 userSchema.statics = {
     searchable: function() {
-        return 'email,_id';
+        return 'email,_id,admin';
     },
     gettables: function() {
-        return 'email,_id';
+        return 'email,_id,admin';
+    },
+    settables: function() {
+        return 'email,password'
+    },
+    settablesByAdmin: function() {
+        return 'email,password,admin'
     }
 };
 require('../validators/userValidator.js')(userSchema);

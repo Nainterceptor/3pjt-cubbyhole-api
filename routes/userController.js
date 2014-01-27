@@ -11,7 +11,7 @@ var uniq = require('../helpers/uniq');
  */
 
 exports.create = function(req, res, next) {
-    var user = new User(req.body);
+    var user = new User(jsonMask(req.body, User.settables));
     user.save(function(err) {
         if (err)
         var result;
@@ -53,6 +53,14 @@ exports.getOne = function(req, res, next) {
         res.json(result);
     });
 
+};
+
+exports.getMy = function(req, res, next) {
+    res.json({
+        success: true,
+        message: 'user.my',
+        user: jsonMask(req.loggedUser, User.gettables())
+    });
 };
 
 exports.remove = function(req, res, next) {

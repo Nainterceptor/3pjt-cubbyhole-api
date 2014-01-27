@@ -9,8 +9,6 @@
     "express": "3.4.8",
     "connect": "~2.12.0",
     "mongoose": "~3.8.4",
-    "json-mask": "~0.2.0",
-    "passport-http-bearer": "~1.0.1",
-    "passport": "~0.1.18"
+    "json-mask": "~0.2.0"
   }
 }
