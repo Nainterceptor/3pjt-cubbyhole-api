@@ -10,7 +10,7 @@ var uniq = require('../helpers/uniq');
  * PUT user
  */
 
-exports.create = function(req, res, next) {
+exports.create = function(req, res) {
     var user = new User(jsonMask(req.body, User.settables));
     user.save(function(err) {
         if (err)
@@ -33,7 +33,7 @@ exports.create = function(req, res, next) {
     });
 };
 
-exports.getOne = function(req, res, next) {
+exports.getOne = function(req, res) {
     var searchOn = jsonMask(req.query, User.searchable());
     User.findOne(searchOn).exec(function(err, doc) {
         var user = jsonMask(doc, User.gettables());
@@ -55,7 +55,7 @@ exports.getOne = function(req, res, next) {
 
 };
 
-exports.getMy = function(req, res, next) {
+exports.getMy = function(req, res) {
     res.json({
         success: true,
         message: 'user.my',
@@ -63,7 +63,7 @@ exports.getMy = function(req, res, next) {
     });
 };
 
-exports.remove = function(req, res, next) {
+exports.remove = function(req, res) {
     var searchOn = jsonMask(req.body, User.searchable());
     User.findOneAndRemove(searchOn, function(err, doc) {
         var user = jsonMask(doc, User.gettables());
@@ -84,7 +84,28 @@ exports.remove = function(req, res, next) {
     });
 
 };
-exports.login = function(req, res, next) {
+
+exports.removeMy = function(req, res) {
+    User.findOneAndRemove(req.loggedUser._id, function(err, doc) {
+        var user = jsonMask(doc, User.gettables());
+        var result;
+        if(doc == null) {
+            result = {
+                success: false,
+                message: 'user.notFound'
+            };
+        } else {
+            result = {
+                success: true,
+                message: 'user.deleted',
+                user: user
+            };
+        }
+        res.json(result);
+    });
+};
+
+exports.login = function(req, res) {
     var credentials = jsonMask(req.body, 'email,password');
     if(credentials == null || credentials.email == null || credentials.password == null) {
         res.json({
