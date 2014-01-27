@@ -17,7 +17,11 @@ userSchema = new schema({
         type: Date,
         default: Date.now
     },
-    email: { type: String, required: true },
+    email: {
+        type: String,
+        required: true,
+        index: { unique: true }
+    },
     hashed_password: { type: String, required: true },
     salt: { type: String },
     token: { type: String },

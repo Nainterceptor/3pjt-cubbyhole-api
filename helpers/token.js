@@ -56,7 +56,7 @@ module.exports.isAdmin = function () {
 };
 module.exports.doubleCheck = function () {
     return function(req, res, next) {
-        if (req.loggedUser.email == req.body.email && req.loggedUser.authenticate(req.body.password)) {
+        if (req.loggedUser.email == req.headers.dc_email && req.loggedUser.authenticate(req.headers.dc_password)) {
             next();
         } else {
             res.send(403, {

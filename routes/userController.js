@@ -11,9 +11,8 @@ var uniq = require('../helpers/uniq');
  */
 
 exports.create = function(req, res) {
-    var user = new User(jsonMask(req.body, User.settables));
+    var user = new User(jsonMask(req.body, User.settables()));
     user.save(function(err) {
-        if (err)
         var result;
         if (err) {
             validatorHelper.error(err);
@@ -153,4 +152,32 @@ exports.login = function(req, res) {
             }
         });
     }
-}
+};
+
+exports.updateMy = function (req, res) {
+    var userDatas = jsonMask(req.body, User.settables());
+    User.findOne(req.loggedUser._id, function (err, user) {
+        Object.keys(userDatas).forEach(function(key) {
+           var val = userDatas[key];
+            user.set(key, val);
+        });
+        user.save(function(saveErr, newUser) {
+            var result;
+            if (saveErr) {
+                validatorHelper.error(saveErr);
+                result = {
+                    success: false,
+                    errors: saveErr.errors,
+                    message: 'validator.error'
+                };
+            } else {
+                result = {
+                    success: true,
+                    message: 'user.update.success',
+                    user: jsonMask(newUser, User.gettables())
+                };
+            }
+            res.json(result)
+        });
+    });
+};
