@@ -181,3 +181,63 @@ exports.updateMy = function (req, res) {
         });
     });
 };
+
+exports.update = function (req, res) {
+    var id = req.params.id;
+    var userDatas = jsonMask(req.body, User.settablesByAdmin());
+    User.findOne(id, function (err, user) {
+        Object.keys(userDatas).forEach(function(key) {
+            var val = userDatas[key];
+            user.set(key, val);
+        });
+        user.save(function(saveErr, newUser) {
+            var result;
+            if (saveErr) {
+                validatorHelper.error(saveErr);
+                result = {
+                    success: false,
+                    errors: saveErr.errors,
+                    message: 'validator.error'
+                };
+            } else {
+                result = {
+                    success: true,
+                    message: 'user.update.success',
+                    user: jsonMask(newUser, User.gettables())
+                };
+            }
+            res.json(result)
+        });
+    });
+};
+
+exports.getAll = function (req, res) {
+    var skip = 0;
+    var limit = 30;
+    if (req.query.skip != null)
+        skip = parseInt(req.query.skip);
+    if (req.query.limit != null)
+        limit = parseInt(req.query.limit);
+    var searchOn = jsonMask(req.query, User.searchable());
+    User.find(searchOn)
+        .skip(skip)
+        .limit(limit)
+        .exec(function (err, users){
+        var usersFiltered = jsonMask(users, User.gettables());
+        var result;
+        if (usersFiltered == null){
+            result = {
+                success: false,
+                message: 'users.notFound'
+            };
+        } else {
+            result = {
+                success: true,
+                message: 'users.many',
+                users: usersFiltered
+            };
+        }
+        res.json(result);
+    });
+
+};

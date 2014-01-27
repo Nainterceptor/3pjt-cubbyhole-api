@@ -8,10 +8,12 @@ module.exports = function (app) {
     doubleCheck = auth.doubleCheck();
     app.get('/', index.index);
 
+    app.get('/users', isLogged, isAdmin, user.getAll);
     app.post('/user/registration', user.create);
     app.post('/user/login', user.login);
     app.get('/user/get', isLogged, isAdmin, user.getOne);
     app.delete('/user/remove', isLogged, isAdmin, user.remove);
+    app.post('/user/update/:id', isLogged, isAdmin, user.update);
     app.get('/user/my/get', isLogged, user.getMy);
     app.delete('/user/my/remove', isLogged, doubleCheck, user.removeMy);
     app.post('/user/my/update', isLogged, doubleCheck, user.updateMy);
