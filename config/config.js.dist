@@ -1,6 +1,7 @@
 module.exports = {
     development: {
-        db: 'mongodb://localhost/cubbyhole'
+        db: 'mongodb://localhost/cubbyhole',
+        tokenExpire: 3600
     },
     test: {},
     production: {}
