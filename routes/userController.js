@@ -112,7 +112,7 @@ exports.login = function(req, res) {
             message: 'user.login.credentialsAreEmpty'
         });
     } else {
-        User.findOne(jsonMask(credentials, User.searchable)).exec(function(err, user) {
+        User.findOne(jsonMask(credentials, User.searchable())).exec(function(err, user) {
             if (!user) {
                 res.json({
                     success: false,
