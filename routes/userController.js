@@ -121,7 +121,7 @@ exports.login = function(req, res) {
             } else if (user.authenticate(credentials.password)) {
                 var now = new Date();
                 var userClean = jsonMask(user, User.gettables());
-                if (user.tokenExpire > now) {
+                if (user.tokenExpire != null && user.tokenExpire > now) {
                     res.json({
                         success: true,
                         message: 'user.login.success',
