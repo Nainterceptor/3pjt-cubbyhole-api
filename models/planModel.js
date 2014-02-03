@@ -33,4 +33,4 @@ planSchema.statics = {
     }
 };
 require('../validators/planValidator.js')(planSchema);
-mongoose.model('Plan', planSchema);
+module.exports = db.model('Plan', planSchema);

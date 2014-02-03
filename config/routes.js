@@ -1,11 +1,13 @@
 var index = require('../routes/indexController');
 var user = require('../routes/userController');
 var plan = require('../routes/planController');
+var file = require('../routes/fileController');
 var auth = require('../helpers/token');
 module.exports = function (app) {
-    isLogged = auth.isLogged();
-    isAdmin = auth.isAdmin();
-    doubleCheck = auth.doubleCheck();
+    isLogged = auth.isLogged;
+    isAdmin = auth.isAdmin;
+    doubleCheck = auth.doubleCheck;
+
     app.get('/', index.index);
 
     app.get('/users', isLogged, isAdmin, user.getAll);
@@ -22,4 +24,6 @@ module.exports = function (app) {
     app.get('/plan/get', plan.get);
     app.delete('/plan/remove', isLogged, isAdmin, plan.remove);
     app.post('/plan/update', isLogged, isAdmin, plan.update);
+
+    app.post('/file/upload', isLogged, file.upload);
 };

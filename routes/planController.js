@@ -1,4 +1,4 @@
-var Plan = require('mongoose').model('Plan');
+var Plan = require('../models/planModel');
 var validatorHelper = require('../helpers/validator.js');
 var jsonMask = require('json-mask');
 /*

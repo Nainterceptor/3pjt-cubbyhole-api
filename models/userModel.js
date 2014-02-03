@@ -114,4 +114,4 @@ userSchema.statics = {
     }
 };
 require('../validators/userValidator.js')(userSchema);
-mongoose.model('User', userSchema);
+module.exports = db.model('User', userSchema);

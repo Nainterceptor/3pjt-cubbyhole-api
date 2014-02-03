@@ -1,5 +1,5 @@
-var User = require('mongoose').model('User');
-var validatorHelper = require('../helpers/validator.js');
+var User = require('../models/userModel');
+var validatorHelper = require('../helpers/validator');
 var jsonMask = require('json-mask');
 var env = process.env.NODE_ENV || 'development';
 var config = require('../config/config')[env];

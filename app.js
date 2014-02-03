@@ -13,7 +13,7 @@ var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config')[env];
 var connect = function () {
     var options = { server: { socketOptions: { keepAlive: 1 } } };
-    mongoose.connect(config.db, options);
+    global.db = mongoose.createConnection(config.db, options);
 }();
 // Error handler
 mongoose.connection.on('error', function (err) {
@@ -25,20 +25,12 @@ mongoose.connection.on('disconnected', function () {
     connect();
 });
 
-// Bootstrap models
-var models_path = __dirname + '/models';
-fs.readdirSync(models_path).forEach(function (file) {
-    if (~file.indexOf('.js')) require(models_path + '/' + file);
-});
-
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.methodOverride());
-app.use(express.bodyParser());
+app.use(express.multipart());
 app.use(app.router);
 
 // development only
