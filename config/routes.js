@@ -18,7 +18,7 @@ module.exports = function (app) {
     app.delete('/user/my/remove', isLogged, doubleCheck, user.removeMy);
     app.post('/user/my/update', isLogged, doubleCheck, user.updateMy);
 
-    app.put('/plan/create', isLogged, isAdmin, plan.create);
+    app.post('/plan/create', isLogged, isAdmin, plan.create);
     app.get('/plan/get', plan.get);
     app.delete('/plan/remove', isLogged, isAdmin, plan.remove);
     app.post('/plan/update', isLogged, isAdmin, plan.update);
