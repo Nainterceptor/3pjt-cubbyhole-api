@@ -26,4 +26,5 @@ module.exports = function (app) {
     app.post('/plan/update', isLogged, isAdmin, plan.update);
 
     app.post('/file/upload', isLogged, file.upload);
+    app.get('/file/download/:id', file.download);
 };

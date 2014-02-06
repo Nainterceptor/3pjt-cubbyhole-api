@@ -8,6 +8,13 @@ var mongoose = require('mongoose');
 var http = require('http');
 var fs = require('fs');
 
+//Clean TMP directory
+var tmpDir = __dirname + '/tmp';
+fs.readdirSync(tmpDir).forEach(function (file) {
+    if (!~file.indexOf('.gitkeep'))
+        fs.unlink(tmpDir + '/' + file);
+});
+
 var app = express();
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config')[env];
@@ -16,21 +23,20 @@ var connect = function () {
     global.db = mongoose.createConnection(config.db, options);
 }();
 // Error handler
-mongoose.connection.on('error', function (err) {
+global.db.on('error', function (err) {
     console.log(err);
 });
 
 // Reconnect when closed
-mongoose.connection.on('disconnected', function () {
+global.db.on('disconnected', function () {
     connect();
 });
 
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.use(express.logger('dev'));
-app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.multipart());
+app.use(express.json());
 app.use(app.router);
 
 // development only

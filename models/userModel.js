@@ -42,6 +42,7 @@ userSchema
     .get(function() { return this._password });
 
 userSchema.methods = {
+
     /**
      * Authenticate - check if the passwords are the same
      *
@@ -49,7 +50,6 @@ userSchema.methods = {
      * @return {Boolean}
      * @api public
      */
-
     authenticate: function (plainText) {
         return this.encryptPassword(plainText) === this.hashed_password
     },
@@ -61,7 +61,6 @@ userSchema.methods = {
      * @return {String}
      * @api public
      */
-
     encryptPassword: function (password) {
         if (!password)
             return '';
@@ -73,13 +72,13 @@ userSchema.methods = {
             return '';
         }
     },
+
     /**
      * Make salt
      *
      * @return {String}
      * @api public
      */
-
     makeSalt: function () {
         return Math.round((new Date().valueOf() * Math.random())) + ''
     },
@@ -92,6 +91,7 @@ userSchema.methods = {
     hasValidToken: function() {
         return (new Date() <= this.tokenExpire);
     },
+
     /**
      * Check if user is admin
      */
