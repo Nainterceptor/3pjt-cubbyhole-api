@@ -4,9 +4,10 @@ var plan = require('../routes/planController');
 var file = require('../routes/fileController');
 var auth = require('../helpers/token');
 module.exports = function (app) {
-    isLogged = auth.isLogged;
-    isAdmin = auth.isAdmin;
-    doubleCheck = auth.doubleCheck;
+    var isLogged = auth.isLogged;
+    var isAdmin = auth.isAdmin;
+    var doubleCheck = auth.doubleCheck;
+    var transparentLoggedUser = auth.transparentLoggedUser;
 
     app.get('/', index.index);
 
@@ -26,5 +27,5 @@ module.exports = function (app) {
     app.post('/plan/update', isLogged, isAdmin, plan.update);
 
     app.post('/file/upload', isLogged, file.upload);
-    app.get('/file/download/:id', file.download);
+    app.get('/file/download/:id', transparentLoggedUser, file.download);
 };

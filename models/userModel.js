@@ -5,6 +5,7 @@
 var mongoose = require('mongoose');
 var crypto = require('crypto');
 var schema = mongoose.Schema;
+var quotaHelper = require('../helpers/quota');
 
 
 /**
@@ -26,7 +27,17 @@ userSchema = new schema({
     salt: { type: String },
     token: { type: String },
     tokenExpire: { type: Date },
-    admin: { type: Boolean }
+    admin: { type: Boolean },
+    latestDownloads: [
+        {
+            _id: String,
+            weight: Number,
+            downloadedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ]
 });
 
 /**
@@ -40,8 +51,16 @@ userSchema
         this.hashed_password = this.encryptPassword(password);
     })
     .get(function() { return this._password });
+userSchema
+    .virtual('downloaded')
+    .get(function() {
+
+    });
 
 userSchema.methods = {
+    cleanDownloads: function () {
+        this.latestDownloads = quotaHelper.cleanOldDownloads(this.latestDownloads);
+    },
 
     /**
      * Authenticate - check if the passwords are the same
@@ -104,7 +123,7 @@ userSchema.statics = {
         return 'email,_id,admin';
     },
     gettables: function() {
-        return 'email,_id,admin';
+        return 'email,_id,admin,downloaded';
     },
     settables: function() {
         return 'email,password'

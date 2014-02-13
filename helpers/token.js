@@ -69,6 +69,8 @@ module.exports.transparentLoggedUser = function(req, res, next) {
         token = req.headers.token;
     else if (req.body.token != null)
         token = req.body.token;
+    else
+        next();
     User.findOne({ token: token }).exec(function(err, user) {
         if (err)
             res.send(403, {
