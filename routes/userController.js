@@ -1,4 +1,6 @@
-var User = require('../models/userModel');
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
+var Plan = mongoose.model('Plan');
 var validatorHelper = require('../helpers/validator');
 var jsonMask = require('json-mask');
 var env = process.env.NODE_ENV || 'development';
@@ -11,8 +13,8 @@ var uniq = require('../helpers/uniq');
  */
 
 exports.create = function(req, res) {
-    var user = new User(jsonMask(req.body, User.settables()));
-    user.save(function(err) {
+    var user = User(jsonMask(req.body, User.settables()));
+    user.save(function(err, user) {
         var result;
         if (err) {
             validatorHelper.error(err);
@@ -253,4 +255,44 @@ exports.getAll = function (req, res) {
         res.json(result);
     });
 
+};
+
+exports.subscribeToPlan = function (req, res) {
+    var id = req.params.id;
+    Plan.findOne(req.body.plan, function(err, plan) {
+        if (err) {
+            res.json({
+                success: false,
+                errors: err,
+                message: 'plan.read.error'
+            });
+        }
+        User.findOne(id, function (err, user) {
+            if (err) {
+                res.json({
+                    success: false,
+                    errors: err,
+                    message: 'user.read.error'
+                });
+            }
+            user.save(function(saveErr, newUser) {
+                var result;
+                if (saveErr) {
+                    validatorHelper.error(saveErr);
+                    result = {
+                        success: false,
+                        errors: saveErr.errors,
+                        message: 'validator.error'
+                    };
+                } else {
+                    result = {
+                        success: true,
+                        message: 'user.update.success',
+                        user: jsonMask(newUser, User.gettables())
+                    };
+                }
+                res.json(result)
+            });
+        });
+    });
 };

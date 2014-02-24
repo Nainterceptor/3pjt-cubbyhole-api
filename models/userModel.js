@@ -3,9 +3,11 @@
  */
 
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.Types.ObjectId;
 var crypto = require('crypto');
 var schema = mongoose.Schema;
 var quotaHelper = require('../helpers/quota');
+var plan = mongoose.model('Plan');
 
 
 /**
@@ -37,7 +39,17 @@ userSchema = new schema({
                 default: Date.now
             }
         }
-    ]
+    ],
+    plan: {
+        _id: {
+            type: ObjectId,
+            ref:'Plan'
+        },
+        price: { type: Number },
+        storage: { type: Number },
+        bandwidth: { type: Number },
+        quota: { type: Number }
+    }
 });
 
 /**
@@ -133,4 +145,4 @@ userSchema.statics = {
     }
 };
 require('../validators/userValidator.js')(userSchema);
-module.exports = db.model('User', userSchema);
+mongoose.model('User', userSchema);

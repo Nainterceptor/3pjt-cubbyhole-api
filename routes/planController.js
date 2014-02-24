@@ -1,4 +1,5 @@
-var Plan = require('../models/planModel');
+var mongoose = require('mongoose');
+var Plan = mongoose.model('Plan');
 var validatorHelper = require('../helpers/validator.js');
 var jsonMask = require('json-mask');
 /*
@@ -8,8 +9,7 @@ var jsonMask = require('json-mask');
 exports.create = function(req, res, next) {
     var plan = new Plan(req.body);
     plan.save(function(err) {
-        if (err)
-            var result;
+        var result;
         if (err) {
             validatorHelper.error(err);
             result = {

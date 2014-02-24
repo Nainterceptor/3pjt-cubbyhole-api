@@ -20,6 +20,7 @@ module.exports = function (app) {
     app.get('/user/my/get', isLogged, user.getMy);
     app.delete('/user/my/remove', isLogged, doubleCheck, user.removeMy);
     app.post('/user/my/update', isLogged, doubleCheck, user.updateMy);
+    app.put('/user/my/subscribe', isLogged, user.subscribeToPlan);
 
     app.post('/plan/create', isLogged, isAdmin, plan.create);
     app.get('/plan/get', plan.get);

@@ -1,13 +1,14 @@
 var fs = require("fs");
 var Grid = require("gridfs-stream");
 var mongoose = require("mongoose");
-var User = require('../models/userModel');
+var User = mongoose.model('User');
 var jsonMask = require('json-mask');
 var formidable = require('formidable');
 var ObjectID = mongoose.mongo.BSONPure.ObjectID;
 var quotaHelper = require('../helpers/quota');
+var Throttle = require('throttle');
 
-var grid = Grid(db.db, mongoose.mongo);
+var grid = Grid(User.db.db, mongoose.mongo);
 
 exports.upload = function (req, res) {
     var form = new formidable.IncomingForm();
@@ -23,7 +24,6 @@ exports.upload = function (req, res) {
             files[field] =  file;
         })
         .on('end', function() {
-            console.log('done');
             if (!Object.keys(files).length) {
                 res.json({
                     success: false,
@@ -69,7 +69,6 @@ exports.upload = function (req, res) {
 var doDownload = function(req, res, file) {
     var weight = 0;
     var options =  {_id: file._id};
-
     if (req.headers['range']) {
         var parts = req.headers['range'].replace(/bytes=/, "").split("-");
         var partialstart = parts[0];
@@ -97,11 +96,13 @@ var doDownload = function(req, res, file) {
         res.removeListener('close', downloadEnded);
         res.end();
     };
+    var throttle = new Throttle(100 * 1024); //100 Ko/s
     grid.createReadStream(options)
         .on('data', function(chunck) {
             weight += chunck.length;
         })
         .on('end', downloadEnded)
+        .pipe(throttle)
         .pipe(res);
     res.on('finish', downloadEnded);
     res.on('close', downloadEnded);

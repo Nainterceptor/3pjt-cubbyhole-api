@@ -20,17 +20,24 @@ var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config')[env];
 var connect = function () {
     var options = { server: { socketOptions: { keepAlive: 1 } } };
-    global.db = mongoose.createConnection(config.db, options);
+    mongoose.connect(config.db, options);
 }();
 // Error handler
-global.db.on('error', function (err) {
+mongoose.connection.on('error', function (err) {
     console.log(err);
 });
 
 // Reconnect when closed
-global.db.on('disconnected', function () {
+mongoose.connection.on('disconnected', function () {
     connect();
 });
+
+// Bootstrap models
+var models_path = __dirname + '/models';
+fs.readdirSync(models_path).forEach(function (file) {
+    if (~file.indexOf('.js')) require(models_path + '/' + file);
+});
+
 
 // all environments
 app.set('port', process.env.PORT || 3000);
