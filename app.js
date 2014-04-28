@@ -8,6 +8,13 @@ var mongoose = require('mongoose');
 var http = require('http');
 var fs = require('fs');
 
+//Clean TMP directory
+var tmpDir = __dirname + '/tmp';
+fs.readdirSync(tmpDir).forEach(function (file) {
+    if (!~file.indexOf('.gitkeep'))
+        fs.unlink(tmpDir + '/' + file);
+});
+
 var app = express();
 var env = process.env.NODE_ENV || 'development';
 var config = require('./config/config')[env];
@@ -31,14 +38,12 @@ fs.readdirSync(models_path).forEach(function (file) {
     if (~file.indexOf('.js')) require(models_path + '/' + file);
 });
 
+
 // all environments
 app.set('port', process.env.PORT || 3000);
-app.use(express.favicon());
 app.use(express.logger('dev'));
-app.use(express.json());
 app.use(express.urlencoded());
-app.use(express.methodOverride());
-app.use(express.bodyParser());
+app.use(express.json());
 app.use(app.router);
 
 // development only

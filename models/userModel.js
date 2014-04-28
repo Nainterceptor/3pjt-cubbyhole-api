@@ -3,8 +3,11 @@
  */
 
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.Types.ObjectId;
 var crypto = require('crypto');
 var schema = mongoose.Schema;
+var quotaHelper = require('../helpers/quota');
+var plan = mongoose.model('Plan');
 
 
 /**
@@ -26,7 +29,27 @@ userSchema = new schema({
     salt: { type: String },
     token: { type: String },
     tokenExpire: { type: Date },
-    admin: { type: Boolean }
+    admin: { type: Boolean },
+    latestDownloads: [
+        {
+            _id: String,
+            weight: Number,
+            downloadedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ],
+    plan: {
+        _id: {
+            type: ObjectId,
+            ref:'Plan'
+        },
+        price: { type: Number },
+        storage: { type: Number },
+        bandwidth: { type: Number },
+        quota: { type: Number }
+    }
 });
 
 /**
@@ -40,8 +63,17 @@ userSchema
         this.hashed_password = this.encryptPassword(password);
     })
     .get(function() { return this._password });
+userSchema
+    .virtual('downloaded')
+    .get(function() {
+
+    });
 
 userSchema.methods = {
+    cleanDownloads: function () {
+        this.latestDownloads = quotaHelper.cleanOldDownloads(this.latestDownloads);
+    },
+
     /**
      * Authenticate - check if the passwords are the same
      *
@@ -49,7 +81,6 @@ userSchema.methods = {
      * @return {Boolean}
      * @api public
      */
-
     authenticate: function (plainText) {
         return this.encryptPassword(plainText) === this.hashed_password
     },
@@ -61,7 +92,6 @@ userSchema.methods = {
      * @return {String}
      * @api public
      */
-
     encryptPassword: function (password) {
         if (!password)
             return '';
@@ -73,13 +103,13 @@ userSchema.methods = {
             return '';
         }
     },
+
     /**
      * Make salt
      *
      * @return {String}
      * @api public
      */
-
     makeSalt: function () {
         return Math.round((new Date().valueOf() * Math.random())) + ''
     },
@@ -92,6 +122,7 @@ userSchema.methods = {
     hasValidToken: function() {
         return (new Date() <= this.tokenExpire);
     },
+
     /**
      * Check if user is admin
      */
@@ -104,7 +135,7 @@ userSchema.statics = {
         return 'email,_id,admin';
     },
     gettables: function() {
-        return 'email,_id,admin';
+        return 'email,_id,admin,downloaded';
     },
     settables: function() {
         return 'email,password'

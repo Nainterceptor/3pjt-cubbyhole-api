@@ -1,11 +1,15 @@
 var index = require('../routes/indexController');
 var user = require('../routes/userController');
 var plan = require('../routes/planController');
+var directory = require('../routes/directoryController');
+var file = require('../routes/fileController');
 var auth = require('../helpers/token');
 module.exports = function (app) {
-    isLogged = auth.isLogged();
-    isAdmin = auth.isAdmin();
-    doubleCheck = auth.doubleCheck();
+    var isLogged = auth.isLogged;
+    var isAdmin = auth.isAdmin;
+    var doubleCheck = auth.doubleCheck;
+    var transparentLoggedUser = auth.transparentLoggedUser;
+
     app.get('/', index.index);
 
     app.get('/users', isLogged, isAdmin, user.getAll);
@@ -17,9 +21,16 @@ module.exports = function (app) {
     app.get('/user/my/get', isLogged, user.getMy);
     app.delete('/user/my/remove', isLogged, doubleCheck, user.removeMy);
     app.post('/user/my/update', isLogged, doubleCheck, user.updateMy);
+    app.put('/user/my/subscribe', isLogged, user.subscribeToPlan);
 
     app.post('/plan/create', isLogged, isAdmin, plan.create);
     app.get('/plan/get', plan.get);
     app.delete('/plan/remove', isLogged, isAdmin, plan.remove);
     app.post('/plan/update', isLogged, isAdmin, plan.update);
+
+    app.post('/file/upload', isLogged, file.upload);
+    app.get('/file/download/:id', transparentLoggedUser, file.download);
+
+    app.post('/directory/create', isLogged, directory.create);
+    app.get('/directory/get', isLogged, directory.getOne);
 };

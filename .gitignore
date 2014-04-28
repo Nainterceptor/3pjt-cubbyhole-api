@@ -39,3 +39,5 @@ out/
 
 #Cover cubbyhole api
 config/config.js
+tmp/*
+!tmp/.gitkeep
