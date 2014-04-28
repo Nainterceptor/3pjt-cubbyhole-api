@@ -20,9 +20,9 @@ var makeSalt = function () {
     return Math.round((new Date().valueOf() * Math.random())) + ''
 };
 
-fs.readdir('./fixtures', function(err, files){
+fs.readdir(__dirname+'/fixtures/', function(err, files){
     for (var i = 0; i< files.length; i++){
-        var path = './fixtures/'+files[i];
+        var path = __dirname+'/fixtures/'+files[i];
         var j = 0;
 
         if (files[i] === 'users.js'){
