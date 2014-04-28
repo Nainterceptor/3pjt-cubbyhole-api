@@ -1,5 +1,5 @@
 {
-  "name": "application-name",
+  "name": "APICubbyhole",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
     "pow-mongodb-fixtures": "~0.10.0",
     "gridfs-stream": "git+ssh://git@github.com:Nainterceptor/gridfs-stream.git",
     "formidable": "~1.0.14",
-    "throttle": "~1.0.3"
+    "throttle": "~1.0.3",
+    "mongoose-tree": "^0.2.2"
   }
 }

@@ -2,6 +2,7 @@ var fs = require("fs");
 var Grid = require("gridfs-stream");
 var mongoose = require("mongoose");
 var User = mongoose.model('User');
+var Directory = mongoose.model('Directory');
 var jsonMask = require('json-mask');
 var formidable = require('formidable');
 var ObjectID = mongoose.mongo.BSONPure.ObjectID;
@@ -34,30 +35,36 @@ exports.upload = function (req, res) {
                 var file = files[key];
                 var user = jsonMask(req.loggedUser, User.gettables());
                 user.rights = 'RW+';
-                var writestream = grid.createWriteStream({
-                    filename: file.name,
-                    metadata: {
-                        users: [user]
+                Directory.findOne({_id: fields.directory}).exec(function(err, directory) {
+                    var options = {
+                        filename: file.name,
+                        metadata: {
+                            users: [user]
+                        }
+                    };
+                    if (directory != null) {
+                        options.metadata.directory = jsonMask(directory, '_id,name');
                     }
+                    var writestream = grid.createWriteStream(options);
+                    writestream.on('unpipe', function() {
+                        fs.unlink(file.path);
+                    });
+                    fs.createReadStream(file.path)
+                        .on('end', function() {
+                            res.json({
+                                success: true,
+                                message: 'file.upload.success'
+                            });
+                        })
+                        .on('error', function(err) {
+                            res.json({
+                                success: false,
+                                message: 'file.upload.errorDuringUpload',
+                                errors: err
+                            });
+                        })
+                        .pipe(writestream);
                 });
-                writestream.on('unpipe', function() {
-                    fs.unlink(file.path);
-                });
-                fs.createReadStream(file.path)
-                    .on('end', function() {
-                        res.json({
-                            success: true,
-                            message: 'file.upload.success'
-                        });
-                    })
-                    .on('error', function(err) {
-                        res.json({
-                            success: false,
-                            message: 'file.upload.errorDuringUpload',
-                            errors: err
-                        });
-                    })
-                    .pipe(writestream);
             });
         })
         .parse(req);

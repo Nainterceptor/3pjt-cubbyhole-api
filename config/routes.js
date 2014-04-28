@@ -1,6 +1,7 @@
 var index = require('../routes/indexController');
 var user = require('../routes/userController');
 var plan = require('../routes/planController');
+var directory = require('../routes/directoryController');
 var file = require('../routes/fileController');
 var auth = require('../helpers/token');
 module.exports = function (app) {
@@ -29,4 +30,7 @@ module.exports = function (app) {
 
     app.post('/file/upload', isLogged, file.upload);
     app.get('/file/download/:id', transparentLoggedUser, file.download);
+
+    app.post('/directory/create', isLogged, directory.create);
+    app.get('/directory/get', isLogged, directory.getOne);
 };
