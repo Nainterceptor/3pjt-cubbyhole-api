@@ -15,6 +15,7 @@ module.exports = function (app) {
     app.get('/users', isLogged, isAdmin, user.getAll);
     app.post('/user/registration', user.create);
     app.post('/user/login', user.login);
+    app.post('/user/renew', user.renew);
     app.get('/user/get', isLogged, isAdmin, user.getOne);
     app.delete('/user/remove', isLogged, isAdmin, user.remove);
     app.post('/user/update/:id', isLogged, isAdmin, user.update);

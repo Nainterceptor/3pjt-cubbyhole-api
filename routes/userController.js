@@ -169,6 +169,63 @@ exports.login = function(req, res) {
     }
 };
 
+exports.renew = function (req, res) {
+    var token = null;
+    if (req.query.token != null)
+        token = req.query.token;
+    else if (req.headers.token != null)
+        token = req.headers.token;
+    else if (req.body.token != null)
+        token = req.body.token;
+    else {
+        res.send(403, {
+            success: false,
+            message: 'token.notFound'
+        });
+    }
+    User.findOne({ token: token }).exec(function(err, user) {
+        if (err)
+            res.send(403, {
+                success: false,
+                message: 'token.searchError',
+                error: err
+            });
+        else if (!user)
+            res.send(403, {
+                success: false,
+                message: 'token.tokenNotFound'
+            });
+        else {
+            var now = new Date();
+            var token = crypto
+                .createHmac('sha1', uniq.uid(10))
+                .update(user.hashed_password + user.email)
+                .digest('hex');
+            var tokenExpire = new Date(now.getTime() + (1000 * config.tokenExpire));
+            user.update({
+                token: token,
+                tokenExpire: tokenExpire
+            }).exec(function(err, saved) {
+                if (saved == null) {
+                    result = {
+                        success: false,
+                        message: 'user.login.userNotFoundDuringRequest'
+                    }
+                } else {
+                    result = {
+                        success: true,
+                        message: 'token.tokenChanged',
+                        token: token,
+                        expireOn: tokenExpire
+
+                    }
+                }
+                res.json(result);
+            });
+        }
+    });
+};
+
 exports.updateMy = function (req, res) {
     var userDatas = jsonMask(req.body, User.settables());
     User.findOne(req.loggedUser._id, function (err, user) {

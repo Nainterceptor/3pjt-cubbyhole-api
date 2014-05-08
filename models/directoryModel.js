@@ -29,7 +29,7 @@ directorySchema.statics = {
         return 'name,_id,user,path';
     },
     settables: function() {
-        return 'name,user';
+        return 'name';
     }
 };
 require('../validators/directoryValidator.js')(directorySchema);
