@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Plan = mongoose.model('Plan');
+var User = mongoose.model('User');
 var validatorHelper = require('../helpers/validator.js');
 var jsonMask = require('json-mask');
 /*
@@ -135,6 +136,15 @@ exports.update = function (req, res, next){
                         message: 'plan.update.success',
                         plan: jsonMask(newPlan, Plan.gettables())
                     };
+                    //cascade
+                    if (typeof req.query.cascade != 'undefined' && req.query.cascade == "true") {
+                        User.find({ 'plan._id': plan._id }, function(err, users) {
+                            users.forEach(function(user) {
+                                user.plan = plan;
+                                user.save();
+                            });
+                        });
+                    }
                 }
                 res.json(result);
             });
