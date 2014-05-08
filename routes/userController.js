@@ -315,7 +315,6 @@ exports.getAll = function (req, res) {
 };
 
 exports.subscribeToPlan = function (req, res) {
-    var id = req.params.id;
     Plan.findOne(req.body.plan, function(err, plan) {
         if (err) {
             res.json({
@@ -324,32 +323,32 @@ exports.subscribeToPlan = function (req, res) {
                 message: 'plan.read.error'
             });
         }
-        User.findOne(id, function (err, user) {
-            if (err) {
-                res.json({
-                    success: false,
-                    errors: err,
-                    message: 'user.read.error'
-                });
-            }
-            user.save(function(saveErr, newUser) {
-                var result;
-                if (saveErr) {
-                    validatorHelper.error(saveErr);
-                    result = {
-                        success: false,
-                        errors: saveErr.errors,
-                        message: 'validator.error'
-                    };
-                } else {
-                    result = {
-                        success: true,
-                        message: 'user.update.success',
-                        user: jsonMask(newUser, User.gettables())
-                    };
-                }
-                res.json(result)
+        var user  = req.loggedUser;
+        if (err) {
+            res.json({
+                success: false,
+                errors: err,
+                message: 'user.read.error'
             });
+        }
+        user.plan = plan;
+        user.save(function(saveErr, newUser) {
+            var result;
+            if (saveErr) {
+                validatorHelper.error(saveErr);
+                result = {
+                    success: false,
+                    errors: saveErr.errors,
+                    message: 'validator.error'
+                };
+            } else {
+                result = {
+                    success: true,
+                    message: 'user.subscribe.success',
+                    user: jsonMask(newUser, User.gettables())
+                };
+            }
+            res.json(result)
         });
     });
 };

@@ -135,7 +135,7 @@ userSchema.statics = {
         return 'email,_id,admin';
     },
     gettables: function() {
-        return 'email,_id,admin,downloaded';
+        return 'email,_id,admin,downloaded,plan';
     },
     settables: function() {
         return 'email,password'
