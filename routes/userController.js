@@ -324,13 +324,6 @@ exports.subscribeToPlan = function (req, res) {
             });
         }
         var user  = req.loggedUser;
-        if (err) {
-            res.json({
-                success: false,
-                errors: err,
-                message: 'user.read.error'
-            });
-        }
         user.plan = plan;
         user.save(function(saveErr, newUser) {
             var result;
