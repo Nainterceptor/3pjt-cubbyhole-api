@@ -161,8 +161,7 @@ exports.login = function(req, res) {
             } else {
                 res.json({
                     success: false,
-                    message: 'user.login.failed',
-                    error: 'user.login.passwordIsWrong'
+                    message: 'user.login.passwordIsWrong'
                 });
             }
         });
