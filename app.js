@@ -43,6 +43,7 @@ fs.readdirSync(models_path).forEach(function (file) {
 app.set('port', process.env.PORT || 3000);
 app.use(function(req, res, next){
     res.header('Access-Control-Allow-Origin' , '*' );
+    res.header('Access-Control-Allow-Headers' , 'token' );
     next();
 });
 app.use(express.logger('dev'));
