@@ -2,6 +2,7 @@ var fs = require("fs");
 var Grid = require("gridfs-stream");
 var mongoose = require("mongoose");
 var User = mongoose.model('User');
+var Plan = mongoose.model('Plan');
 var Directory = mongoose.model('Directory');
 var jsonMask = require('json-mask');
 var formidable = require('formidable');
@@ -34,6 +35,7 @@ exports.upload = function (req, res) {
             Object.keys(files).forEach(function(key) {
                 var file = files[key];
                 var user = jsonMask(req.loggedUser, User.gettables());
+                user.plan = jsonMask(user.plan, Plan.gettables());
                 user.rights = 'RW+';
                 Directory.findOne({_id: fields.directory}).exec(function(err, directory) {
                     var options = {
@@ -68,8 +70,6 @@ exports.upload = function (req, res) {
             });
         })
         .parse(req);
-
-
 
 };
 
@@ -152,4 +152,8 @@ exports.download = function (req, res) {
             });
         }
     });
+};
+
+exports.list = function (req, res, next) {
+
 };

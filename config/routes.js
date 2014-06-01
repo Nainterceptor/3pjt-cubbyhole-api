@@ -30,7 +30,8 @@ module.exports = function (app) {
     app.post('/plan/update', isLogged, isAdmin, plan.update);
 
     app.post('/file/upload', isLogged, file.upload);
-    app.get('/file/download/:id', transparentLoggedUser, file.download);
+    app.post('/files/list/:directory', isLogged, file.upload);
+    app.get('/file/download/:id', transparentLoggedUser, file.list);
 
     app.post('/directory/create', isLogged, directory.create);
     app.get('/directory/get', isLogged, directory.getOne);
