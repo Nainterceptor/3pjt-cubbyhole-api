@@ -26,7 +26,7 @@ directorySchema.statics = {
         return 'name,_id,user,path';
     },
     gettables: function() {
-        return 'name,_id,user,path';
+        return 'name,_id,user,user._id,user.email,path';
     },
     settables: function() {
         return 'name';
