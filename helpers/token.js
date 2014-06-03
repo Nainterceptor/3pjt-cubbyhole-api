@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+var Directory = mongoose.model('Directory');
 
 
 module.exports.isLogged = function(req, res, next) {
@@ -39,6 +40,37 @@ module.exports.isLogged = function(req, res, next) {
 
         }
     });
+};
+
+module.exports.isOwner = function (req, res, next){
+  Directory.findOne({_id: req.params.directory}).exec(function(err, directory){
+      if (err)
+          res.send(403, {
+              success: false,
+              message: 'directory.searchError',
+              error: err
+          });
+      else if (!directory)
+          res.send(403, {
+              success: false,
+              message: 'directory.directoryNotFound'
+          });
+      else {
+          var ownerFound = false;
+          directory.users.forEach(function (user){
+              if (req.loggedUser.id == user.id && user.rights=='RW+'){
+                  ownerFound = true;
+                  req.directory = directory;
+                  next();
+              }
+          });
+          if (!ownerFound)
+              res.send('403', {
+                  success: false,
+                  message: 'directory.userNotOwner'
+              });
+      }
+  });
 };
 
 module.exports.isAdmin = function(req, res, next) {

@@ -10,26 +10,30 @@ var tree = require('mongoose-tree');
 var directorySchema;
 directorySchema = new schema({
     name: { type: String, required: true },
-    user: {
+    users: [{
         _id: {
             type: ObjectId,
             ref:'User'
         },
-        email: String
-    }
+        email: String,
+        rights: String
+    }]
 });
 
 directorySchema.plugin(tree);
 
 directorySchema.statics = {
     searchable: function() {
-        return 'name,_id,user,path';
+        return 'name,_id,path,users/*,parent';
     },
     gettables: function() {
-        return 'name,_id,user,user._id,user.email,path';
+        return 'name,_id,path,users,parent';
     },
     settables: function() {
-        return 'name';
+        return 'name,parent';
+    },
+    settablesUser: function() {
+        return 'users/*';
     }
 };
 require('../validators/directoryValidator.js')(directorySchema);

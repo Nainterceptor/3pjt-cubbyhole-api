@@ -1,12 +1,13 @@
-var index = require('../routes/indexController');
-var user = require('../routes/userController');
-var plan = require('../routes/planController');
-var directory = require('../routes/directoryController');
-var file = require('../routes/fileController');
+var index = require('../controllers/indexController');
+var user = require('../controllers/userController');
+var plan = require('../controllers/planController');
+var directory = require('../controllers/directoryController');
+var file = require('../controllers/fileController');
 var auth = require('../helpers/token');
 module.exports = function (app) {
     var isLogged = auth.isLogged;
     var isAdmin = auth.isAdmin;
+    var isOwner = auth.isOwner;
     var doubleCheck = auth.doubleCheck;
     var transparentLoggedUser = auth.transparentLoggedUser;
 
@@ -34,5 +35,9 @@ module.exports = function (app) {
     app.get('/file/download/:id', transparentLoggedUser, file.list);
 
     app.post('/directory/create', isLogged, directory.create);
-    app.get('/directory/get', isLogged, directory.getOne);
+//    app.get('/directory/get', isLogged, directory.getOne);
+    app.post('/directory/update/:directory', isLogged, isOwner, directory.update);
+    app.post('/directory/update/:directory/addusers', isLogged, isOwner, directory.addUsers);
+    app.post('/directory/update/:directory/updateuser/:id', isLogged, directory.updateUser);
+    app.delete('/directory/update/:directory/removeuser/:id', isLogged, directory.removeUser);
 };
