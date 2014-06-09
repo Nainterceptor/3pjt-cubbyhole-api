@@ -154,6 +154,34 @@ exports.download = function (req, res) {
     });
 };
 
-exports.list = function (req, res, next) {
-
+exports.list = function (req, res) {
+    var directory = req.params.directory;
+    var searchOnDirectories = {
+        "users._id": req.loggedUser.id
+    };
+    var searchOnFiles = {
+        "metadata.users._id": req.loggedUser._id
+    };
+    if (directory != null) {
+//        searchOn['metadata.directory'] = directory;
+    }
+    Directory.find(searchOnDirectories).exec(function(err, directories) {
+        directories.forEach(function(directory, indexDirectory) {
+            directory.users.forEach(function(user, indexUser) {
+                directory.users[indexUser] = jsonMask(user, User.gettablesForFileList());
+            });
+            directories[indexDirectory] = jsonMask(directory, Directory.gettables());
+        });
+        grid.files.find(searchOnFiles).toArray(function (err, files) {
+            files.forEach(function(file, indexFile){
+                files[indexFile] = jsonMask(file, '_id,filename,contentType,uploadDate,metadata/users');
+            });
+            res.json({
+                success: true,
+                message: 'file.list',
+                files: files,
+                directories: directories
+            });
+        });
+    });
 };

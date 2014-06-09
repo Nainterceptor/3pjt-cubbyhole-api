@@ -137,6 +137,9 @@ userSchema.statics = {
     gettables: function() {
         return 'email,_id,admin,downloaded,plan';
     },
+    gettablesForFileList: function() {
+        return 'email,_id,rights';
+    },
     settables: function() {
         return 'email,password'
     },

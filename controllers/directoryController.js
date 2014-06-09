@@ -34,44 +34,6 @@ exports.create = function(req, res) {
     });
 };
 
-/*exports.getOne = function(req, res) {
- var searchOn = jsonMask(req.query, Directory.searchable());
- //    if (searchOn == null)
- //        searchOn = {};
- //    searchOn.user = jsonMask(req.loggedUser, "_id,email");
- Directory.findOne(searchOn).exec(function(err, doc) {
- var directory = jsonMask(doc, Directory.gettables());
- var result;
- if (directory == null) {
- result = {
- success: false,
- message: 'directory.notFound'
- };
- res.json(result);
- } else {
- doc.getChildren(function (err, children) {
- doc.getAncestors(function (err, ancestors) {
- children.forEach(function(row, index, array) {
- array[index] = jsonMask(row, Directory.gettables());
- });
- ancestors.forEach(function(row, index, array) {
- array[index] = jsonMask(row, Directory.gettables());
- });
- result = {
- success: true,
- message: 'directory.one',
- directory: directory,
- children: children,
- parent: ancestors
- };
- res.json(result);
- });
- });
- }
- });
-
- };*/
-
 exports.remove = function(req, res) {
 };
 
