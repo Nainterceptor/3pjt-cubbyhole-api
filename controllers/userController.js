@@ -314,7 +314,7 @@ exports.getAll = function (req, res) {
 };
 
 exports.subscribeToPlan = function (req, res) {
-    Plan.findOne(req.body.plan, function(err, plan) {
+    Plan.findOne({'_id': req.body.plan}, function(err, plan) {
         if (err) {
             res.json({
                 success: false,
@@ -340,7 +340,7 @@ exports.subscribeToPlan = function (req, res) {
                     user: jsonMask(newUser, User.gettables())
                 };
             }
-            res.json(result)
+            res.json(result);
         });
     });
 };

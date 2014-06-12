@@ -88,12 +88,12 @@ var doDownload = function(req, res, file) {
             'Accept-Ranges': 'bytes',
             'Content-Length': options.end - options.start + 1,
             'Content-Type': file.contentType,
-            'Content-disposition': 'attachment; filename=' + file.filename
+            'Content-disposition': 'attachment; filename="' + file.filename + '"'
         });
     } else {
         res.setHeader('Content-type', file.contentType);
         res.setHeader('Content-Length', file.length);
-        res.setHeader('Content-disposition', 'attachment; filename=' + file.filename);
+        res.setHeader('Content-disposition', 'attachment; filename="' + file.filename + '"');
     }
 
     var downloadEnded = function(){
@@ -103,7 +103,7 @@ var doDownload = function(req, res, file) {
         res.removeListener('close', downloadEnded);
         res.end();
     };
-    var throttle = new Throttle(100 * 1024); //100 Ko/s
+    var throttle = new Throttle({ bps: 3 * 1024 * 1024, chunkSize: file.chunkSize }); //100 Ko/s
     grid.createReadStream(options)
         .on('data', function(chunck) {
             weight += chunck.length;
@@ -174,7 +174,7 @@ exports.list = function (req, res) {
         });
         grid.files.find(searchOnFiles).toArray(function (err, files) {
             files.forEach(function(file, indexFile){
-                files[indexFile] = jsonMask(file, '_id,filename,contentType,uploadDate,metadata/users');
+                files[indexFile] = jsonMask(file, '_id,filename,length,contentType,uploadDate,md5,metadata/users');
             });
             res.json({
                 success: true,
