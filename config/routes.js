@@ -31,11 +31,12 @@ module.exports = function (app) {
     app.post('/plan/update', isLogged, isAdmin, plan.update);
 
     app.post('/file/upload', isLogged, file.upload);
-    app.post('/files/list/:directory', isLogged, file.upload);
-    app.get('/file/download/:id', transparentLoggedUser, file.list);
+    app.get('/files/list/:directory', isLogged, file.list);
+    app.get('/files/list', isLogged, file.list);
+    app.get('/file/download/:id', transparentLoggedUser, file.download);
 
     app.post('/directory/create', isLogged, directory.create);
-//    app.get('/directory/get', isLogged, directory.getOne);
+    app.get('/directory/get-breadcrumb/:directory', isLogged, isOwner, directory.getBreadcrumb);
     app.post('/directory/update/:directory', isLogged, isOwner, directory.update);
     app.post('/directory/update/:directory/edit-rights', isLogged, isOwner, directory.editRights);
     app.post('/directory/update/:directory/updateuser/:id', isLogged, directory.updateUser);

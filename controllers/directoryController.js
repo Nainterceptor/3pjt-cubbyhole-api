@@ -188,10 +188,41 @@ exports.editRights = function(req, res){
 });
 };
 
-exports.updateUser = function(req, res){
+exports.updateUser = function (req, res){
 
 };
 
-exports.removeUser = function(req, res){
+exports.removeUser = function (req, res){
+
+};
+
+exports.getBreadcrumb = function (req, res) {
+    var id = req.params.directory;
+    Directory.findOne({ _id: id }).exec(function(err, doc) {
+        var directory = jsonMask(doc, Directory.gettables());
+        var result;
+        if (directory == null) {
+            result = {
+                success: false,
+                message: 'directory.notFound'
+            };
+            res.json(result);
+        } else {
+            doc.getAncestors(function (err, ancestors) {
+                ancestors.forEach(function(row, index, array) {
+                    array[index] = jsonMask(row, Directory.gettables());
+                });
+                result = {
+                    success: true,
+                    message: 'directory.one',
+                    directory: directory,
+                    parent: ancestors
+                };
+                res.json(result);
+
+            });
+        }
+
+    });
 
 };

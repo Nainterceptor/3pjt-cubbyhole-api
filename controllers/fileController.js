@@ -162,8 +162,14 @@ exports.list = function (req, res) {
     var searchOnFiles = {
         "metadata.users._id": req.loggedUser._id
     };
-    if (directory != null) {
-//        searchOn['metadata.directory'] = directory;
+    if (null == directory) {
+        searchOnDirectories["parent"] = {"$exists" : false};
+        searchOnFiles["metadata.directory"] = {"$exists" : false};
+
+    } else {
+        searchOnDirectories["parent"] = directory;
+        searchOnFiles['metadata.directory'] = directory;
+
     }
     Directory.find(searchOnDirectories).exec(function(err, directories) {
         directories.forEach(function(directory, indexDirectory) {
