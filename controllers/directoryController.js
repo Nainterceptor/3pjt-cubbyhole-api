@@ -34,6 +34,44 @@ exports.create = function(req, res) {
     });
 };
 
+/*exports.getOne = function(req, res) {
+ var searchOn = jsonMask(req.query, Directory.searchable());
+ //    if (searchOn == null)
+ //        searchOn = {};
+ //    searchOn.user = jsonMask(req.loggedUser, "_id,email");
+ Directory.findOne(searchOn).exec(function(err, doc) {
+ var directory = jsonMask(doc, Directory.gettables());
+ var result;
+ if (directory == null) {
+ result = {
+ success: false,
+ message: 'directory.notFound'
+ };
+ res.json(result);
+ } else {
+ doc.getChildren(function (err, children) {
+ doc.getAncestors(function (err, ancestors) {
+ children.forEach(function(row, index, array) {
+ array[index] = jsonMask(row, Directory.gettables());
+ });
+ ancestors.forEach(function(row, index, array) {
+ array[index] = jsonMask(row, Directory.gettables());
+ });
+ result = {
+ success: true,
+ message: 'directory.one',
+ directory: directory,
+ children: children,
+ parent: ancestors
+ };
+ res.json(result);
+ });
+ });
+ }
+ });
+
+ };*/
+
 exports.remove = function(req, res) {
 };
 
@@ -64,18 +102,13 @@ exports.update = function (req, res){
     });
 };
 
-exports.addUsers = function(req, res){
+exports.editRights = function(req, res){
     var params = jsonMask(req.body, Directory.settablesUser());
     var directory = req.directory;
     var dirUsers = directory.users;
     var emails = [];
     var result;
     params.users.forEach(function (user){
-        if (!user.rights)
-            res.json(result = {
-                success: false,
-                message: 'directory.users.rights.notFound'
-            });
         emails.push(user.email);
     });
     User.find({email: {$in: emails}}).exec(function (err, users){
@@ -88,12 +121,11 @@ exports.addUsers = function(req, res){
         } else if (users.length != emails.length){
             var usersNotFound = [];
             emails.forEach(function(email){
-                var found = false;
-                users.forEach(function(user){
-                    if (user.email == email)
-                        found = true;
+                var found = users.every(function(user){
+                    return (user.email != email);
+
                 });
-                if (!found)
+                if (found)
                     usersNotFound.push(email);
             });
             result = {
@@ -104,43 +136,56 @@ exports.addUsers = function(req, res){
             res.json(result);
         } else {
             users.forEach(function (user){
-                var found = false;
-                directory.users.forEach(function (dirUser){
-                    if (user.id == dirUser.id)
-                        found = true;
+                var found = directory.users.every(function (dirUser, index, dirtUsers) {
+                    if (user.id == dirUser.id) {
+                        params.users.some(function (paramsUser) {
+                            if (user.email == paramsUser.email) {
+                                if (paramsUser.rights != undefined)
+                                    dirtUsers[index].rights = paramsUser.rights;
+                                else
+                                    dirtUsers.splice(index);
+                                return true;
+                            }
+                            return false;
+                        });
+                        return false;
+                    }
+                    return true;
                 });
-                if (!found){
-                    params.users.forEach(function (paramUser){
-                        if (user.email == paramUser.email){
+                if (found){
+                    params.users.some(function(paramsUser){
+                        if (user.email == paramsUser.email){
                             var userToAdd = {};
                             userToAdd._id = user._id;
-                            userToAdd.email = paramUser.email;
-                            userToAdd.rights = paramUser.rights;
+                            userToAdd.email = paramsUser.email;
+                            userToAdd.rights = paramsUser.rights;
                             dirUsers.push(userToAdd);
                             directory.set('users', dirUsers);
+                            return true;
                         }
+                        return false;
                     });
                 }
             });
-            directory.save(function (saveErr, newDirectory){
-                if (saveErr) {
-                    validatorHelper.error(saveErr);
-                    result = {
-                        success: false,
-                        errors: saveErr.errors,
-                        message: 'validator.error'
-                    };
-                } else {
-                    result = {
-                        success: true,
-                        message: 'directory.update.success',
-                        user: jsonMask(newDirectory, Directory.gettables())
-                    };
-                }
-                res.json(result);
-            });
-        }
-    });
+        directory.save(function (saveErr, newDirectory){
+            if (saveErr) {
+                validatorHelper.error(saveErr);
+                result = {
+                    success: false,
+                    errors: saveErr.errors,
+                    message: 'validator.error'
+                };
+            } else {
+                result = {
+                    success: true,
+                    message: 'directory.update.success',
+                    user: jsonMask(newDirectory, Directory.gettables())
+                };
+            }
+            res.json(result);
+        });
+    }
+});
 };
 
 exports.updateUser = function(req, res){
