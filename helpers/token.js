@@ -1,6 +1,9 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var Directory = mongoose.model('Directory');
+var Grid = require("gridfs-stream");
+var grid = Grid(User.db.db, mongoose.mongo);
+
 
 
 module.exports.isLogged = function(req, res, next) {
@@ -42,35 +45,47 @@ module.exports.isLogged = function(req, res, next) {
     });
 };
 
-module.exports.isOwner = function (req, res, next){
-  Directory.findOne({_id: req.params.directory}).exec(function(err, directory){
-      if (err)
-          res.send(403, {
-              success: false,
-              message: 'directory.searchError',
-              error: err
-          });
-      else if (!directory)
-          res.send(403, {
-              success: false,
-              message: 'directory.directoryNotFound'
-          });
-      else {
-          var ownerFound = false;
-          directory.users.forEach(function (user){
-              if (req.loggedUser.id == user.id && user.rights=='RW+'){
-                  ownerFound = true;
-                  req.directory = directory;
-                  next();
-              }
-          });
-          if (!ownerFound)
-              res.send('403', {
-                  success: false,
-                  message: 'directory.userNotOwner'
-              });
-      }
-  });
+module.exports.has = function(rights) {
+    return function (req, res, next){
+        var Type;
+        var typeName;
+        if (req.params.directory){
+            Type = Directory;
+            typeName = 'directory';
+        }
+        else if (req.params.file){
+            Type = grid.files;
+            typeName = 'file';
+        }
+        Type.findOne({_id: req.params[typeName]}).exec(function(err, type){
+            if (err)
+                res.send(403, {
+                    success: false,
+                    message: typeName + '.searchError',
+                    error: err
+                });
+            else if (!type)
+                res.send(403, {
+                    success: false,
+                    message: typeName+'.'+typeName+'NotFound'
+                });
+            else {
+                var found = false;
+                type.users.forEach(function (user){
+                    if (req.loggedUser.id == user.id && user.rights==rights){
+                        found = true;
+                        req[typeName] = type;
+                        next();
+                    }
+                });
+                if (!found)
+                    res.send('403', {
+                        success: false,
+                        message: typeName+'.permissionDenied'
+                    });
+            }
+        });
+    }
 };
 
 module.exports.isAdmin = function(req, res, next) {

@@ -7,7 +7,7 @@ var auth = require('../helpers/token');
 module.exports = function (app) {
     var isLogged = auth.isLogged;
     var isAdmin = auth.isAdmin;
-    var isOwner = auth.isOwner;
+    var has = auth.has;
     var doubleCheck = auth.doubleCheck;
     var transparentLoggedUser = auth.transparentLoggedUser;
 
@@ -36,9 +36,7 @@ module.exports = function (app) {
     app.get('/file/download/:id', transparentLoggedUser, file.download);
 
     app.post('/directory/create', isLogged, directory.create);
-    app.get('/directory/get-breadcrumb/:directory', isLogged, isOwner, directory.getBreadcrumb);
-    app.post('/directory/update/:directory', isLogged, isOwner, directory.update);
-    app.post('/directory/update/:directory/edit-rights', isLogged, isOwner, directory.editRights);
-    app.post('/directory/update/:directory/updateuser/:id', isLogged, directory.updateUser);
-    app.delete('/directory/update/:directory/removeuser/:id', isLogged, directory.removeUser);
+    app.get('/directory/get-breadcrumb/:directory', isLogged, has('R'), directory.getBreadcrumb);
+    app.post('/directory/update/:directory', isLogged, has('RW'), directory.update);
+    app.post('/directory/update/:directory/edit-rights', isLogged, has('RW+'), directory.editRights);
 };

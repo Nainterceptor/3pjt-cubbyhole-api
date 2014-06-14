@@ -167,33 +167,25 @@ exports.editRights = function(req, res){
                     });
                 }
             });
-        directory.save(function (saveErr, newDirectory){
-            if (saveErr) {
-                validatorHelper.error(saveErr);
-                result = {
-                    success: false,
-                    errors: saveErr.errors,
-                    message: 'validator.error'
-                };
-            } else {
-                result = {
-                    success: true,
-                    message: 'directory.update.success',
-                    user: jsonMask(newDirectory, Directory.gettables())
-                };
-            }
-            res.json(result);
-        });
-    }
-});
-};
-
-exports.updateUser = function (req, res){
-
-};
-
-exports.removeUser = function (req, res){
-
+            directory.save(function (saveErr, newDirectory){
+                if (saveErr) {
+                    validatorHelper.error(saveErr);
+                    result = {
+                        success: false,
+                        errors: saveErr.errors,
+                        message: 'validator.error'
+                    };
+                } else {
+                    result = {
+                        success: true,
+                        message: 'directory.update.success',
+                        user: jsonMask(newDirectory, Directory.gettables())
+                    };
+                }
+                res.json(result);
+            });
+        }
+    });
 };
 
 exports.getBreadcrumb = function (req, res) {
