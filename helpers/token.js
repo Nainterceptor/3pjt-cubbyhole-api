@@ -72,7 +72,7 @@ module.exports.has = function(rights) {
             else {
                 var found = false;
                 type.users.forEach(function (user){
-                    if (req.loggedUser.id == user.id && user.rights==rights){
+                    if (req.loggedUser.id == user.id && user.rights.search(rights) > -1){
                         found = true;
                         req[typeName] = type;
                         next();

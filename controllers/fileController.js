@@ -168,7 +168,7 @@ exports.list = function (req, res) {
 
     } else {
         searchOnDirectories["parent"] = directory;
-        searchOnFiles['metadata.directory'] = directory;
+        searchOnFiles['metadata.directory._id'] = ObjectID(directory);
 
     }
     Directory.find(searchOnDirectories).exec(function(err, directories) {
