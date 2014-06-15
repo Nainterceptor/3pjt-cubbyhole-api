@@ -89,6 +89,31 @@ exports.update = function (req, res){
     });
 };
 
+function editRightsCascade(directory, userId, users) {
+    directory.getChildren(function (err, children) {
+        children.forEach(function(child) {
+            editRightsCascade(child);
+        });
+    });
+    directory.set('users', users);
+    directory.save(function (saveErr, newDirectory) {
+    });
+    var searchOnFiles = {
+//        "metadata.users._id": userId,
+        "metadata.directory._id": directory._id
+    };
+    grid.files.find(searchOnFiles).toArray(function (err, files) {
+        users.forEach(function (user, indexUser) {
+            users[indexUser] = jsonMask(user, User.gettablesForFileList());
+        });
+        files.forEach(function(file) {
+            file.metadata.users = users;
+            grid.files.update({'_id': file._id}, file,{'w':1},function(err, newFile){
+            });
+        });
+    });
+}
+
 exports.editRights = function(req, res) {
     var params = jsonMask(req.body, Directory.settablesUser());
     var directory = req.directory;
@@ -154,23 +179,33 @@ exports.editRights = function(req, res) {
                     });
                 }
             });
-            directory.save(function (saveErr, newDirectory) {
-                if (saveErr) {
-                    validatorHelper.error(saveErr);
-                    result = {
-                        success: false,
-                        errors: saveErr.errors,
-                        message: 'validator.error'
-                    };
-                } else {
-                    result = {
-                        success: true,
-                        message: 'directory.update.success',
-                        user: jsonMask(newDirectory, Directory.gettables())
-                    };
-                }
+            if (req.body.cascade){
+                editRightsCascade(directory,req.loggedUser._id,dirUsers);
+                result = {
+                    success: true,
+                    message: 'directory.updateCascade.success',
+                    user: directory.users
+                };
                 res.json(result);
-            });
+            } else {
+                directory.save(function (saveErr, newDirectory) {
+                    if (saveErr) {
+                        validatorHelper.error(saveErr);
+                        result = {
+                            success: false,
+                            errors: saveErr.errors,
+                            message: 'validator.error'
+                        };
+                    } else {
+                        result = {
+                            success: true,
+                            message: 'directory.update.success',
+                            user: jsonMask(newDirectory, Directory.gettables())
+                        };
+                    }
+                    res.json(result);
+                });
+            }
         }
     });
 };

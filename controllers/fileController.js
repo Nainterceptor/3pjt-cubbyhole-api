@@ -46,6 +46,16 @@ exports.upload = function (req, res) {
                     };
                     if (directory != null) {
                         options.metadata.directory = jsonMask(directory, '_id,name');
+                        directory.users.forEach(function(userDir){
+                            if (!userDir.rights && userDir.id != user.id){
+                                var userToAdd = {};
+                                userToAdd._id = userDir._id;
+                                userToAdd.email = userDir.email;
+                                userToAdd.rights = 'R';
+                                options.metadata.users.push(userToAdd);
+
+                            }
+                        });
                     }
                     var writestream = grid.createWriteStream(options);
                     writestream.on('unpipe', function() {
