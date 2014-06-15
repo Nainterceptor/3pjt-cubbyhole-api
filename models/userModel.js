@@ -45,6 +45,7 @@ userSchema = new schema({
             type: ObjectId,
             ref:'Plan'
         },
+        name: {type: String},
         price: { type: Number },
         storage: { type: Number },
         bandwidth: { type: Number },
