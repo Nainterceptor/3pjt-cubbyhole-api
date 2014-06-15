@@ -164,6 +164,16 @@ exports.download = function (req, res) {
     });
 };
 
+exports.remove = function (req, res) {
+    var id = req.params.file;
+    grid.remove({ "_id" : ObjectID(id)}, function (err) {
+        res.json({
+            success: true,
+            message: 'file.removed'
+        })
+    });
+};
+
 exports.list = function (req, res) {
     var directory = req.params.directory;
     var searchOnDirectories = {

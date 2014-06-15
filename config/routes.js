@@ -33,7 +33,8 @@ module.exports = function (app) {
     app.post('/file/upload', isLogged, file.upload);
     app.get('/files/list/:directory', isLogged, file.list);
     app.get('/files/list', isLogged, file.list);
-    app.get('/file/download/:id', transparentLoggedUser, file.download);
+    app.get('/file/download/:file', transparentLoggedUser, file.download);
+    app.delete('/file/remove/:file', isLogged, has('RW+'), file.remove);
 
     app.post('/directory/create', isLogged, directory.create);
     app.get('/directory/get-breadcrumb/:directory', isLogged, has('R'), directory.getBreadcrumb);

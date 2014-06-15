@@ -3,8 +3,7 @@ var User = mongoose.model('User');
 var Directory = mongoose.model('Directory');
 var Grid = require("gridfs-stream");
 var grid = Grid(User.db.db, mongoose.mongo);
-
-
+var ObjectID = mongoose.mongo.BSONPure.ObjectID;
 
 module.exports.isLogged = function(req, res, next) {
     var token = null;
@@ -56,8 +55,9 @@ module.exports.has = function(rights) {
         else if (req.params.file){
             Type = grid.files;
             typeName = 'file';
+            req.params[typeName] = ObjectID(req.params[typeName]);
         }
-        Type.findOne({_id: req.params[typeName]}).exec(function(err, type){
+        Type.findOne({_id: req.params[typeName]}, function(err, type){
             if (err)
                 res.send(403, {
                     success: false,
@@ -71,8 +71,14 @@ module.exports.has = function(rights) {
                 });
             else {
                 var found = false;
-                type.users.forEach(function (user){
-                    if (req.loggedUser.id == user.id && user.rights.search(rights) > -1){
+                var usersArray;
+                if ('undefined' != typeof req.params.file){
+                    usersArray = type.metadata.users;
+                } else {
+                    usersArray = type.users;
+                }
+                usersArray.forEach(function (user) {
+                    if ((('undefined' != typeof user.id && req.loggedUser.id == user.id) || req.loggedUser.id == user._id.toString() )&& user.rights.search(rights) > -1){
                         found = true;
                         req[typeName] = type;
                         next();
