@@ -115,7 +115,8 @@ var doDownload = function(req, res, file) {
     };
     var speed = 25 * 1024;
     if (req.loggedUser.plan){
-        speed = req.loggedUser.plan.bandwidth;
+        if (req.loggedUser.plan.bandwidth)
+            speed = req.loggedUser.plan.bandwidth;
     }
     if (speed != 0) {
         var throttle = new Throttle({ bps: speed, chunkSize: file.chunkSize }); //100 Ko/s
