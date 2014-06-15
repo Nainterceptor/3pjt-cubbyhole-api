@@ -47,7 +47,7 @@ exports.upload = function (req, res) {
                     if (directory != null) {
                         options.metadata.directory = jsonMask(directory, '_id,name');
                         directory.users.forEach(function(userDir){
-                            if (!userDir.rights && userDir.id != user.id){
+                            if (userDir.rights && userDir.id != user._id.toString()){
                                 var userToAdd = {};
                                 userToAdd._id = userDir._id;
                                 userToAdd.email = userDir.email;
@@ -113,16 +113,31 @@ var doDownload = function(req, res, file) {
         res.removeListener('close', downloadEnded);
         res.end();
     };
-    var throttle = new Throttle({ bps: 3 * 1024 * 1024, chunkSize: file.chunkSize }); //100 Ko/s
-    grid.createReadStream(options)
-        .on('data', function(chunck) {
-            weight += chunck.length;
-        })
-        .on('end', downloadEnded)
-        .pipe(throttle)
-        .pipe(res);
-    res.on('finish', downloadEnded);
-    res.on('close', downloadEnded);
+    var speed = 25 * 1024;
+    if (req.loggedUser.plan){
+        speed = req.loggedUser.plan.bandwidth;
+    }
+    if (speed != 0) {
+        var throttle = new Throttle({ bps: speed, chunkSize: file.chunkSize }); //100 Ko/s
+        grid.createReadStream(options)
+            .on('data', function (chunck) {
+                weight += chunck.length;
+            })
+            .on('end', downloadEnded)
+            .pipe(throttle)
+            .pipe(res);
+        res.on('finish', downloadEnded);
+        res.on('close', downloadEnded);
+    } else {
+        grid.createReadStream(options)
+            .on('data', function (chunck) {
+                weight += chunck.length;
+            })
+            .on('end', downloadEnded)
+            .pipe(res);
+        res.on('finish', downloadEnded);
+        res.on('close', downloadEnded);
+    }
 };
 
 exports.download = function (req, res) {
