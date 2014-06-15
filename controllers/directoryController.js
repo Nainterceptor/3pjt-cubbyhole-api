@@ -49,15 +49,17 @@ function removeCascade(directory, userId) {
     };
     grid.files.find(searchOnFiles).toArray(function (err, files) {
         files.forEach(function(file) {
-            grid.remove({'_id': file._id}, function (foo) {
-                console.log(foo);
-            });
+            grid.remove({'_id': file._id}, function () {});
         });
     });
 }
 
 exports.remove = function(req, res) {
     removeCascade(req.directory, req.loggedUser._id);
+    res.json({
+        success: true,
+        message: 'remove.async'
+    });
 };
 
 exports.update = function (req, res){
@@ -87,26 +89,26 @@ exports.update = function (req, res){
     });
 };
 
-exports.editRights = function(req, res){
+exports.editRights = function(req, res) {
     var params = jsonMask(req.body, Directory.settablesUser());
     var directory = req.directory;
     var dirUsers = directory.users;
     var emails = [];
     var result;
-    params.users.forEach(function (user){
+    params.users.forEach(function (user) {
         emails.push(user.email);
     });
-    User.find({email: {$in: emails}}).exec(function (err, users){
+    User.find({email: {$in: emails}}).exec(function (err, users) {
         if (users == null) {
             result = {
                 success: false,
                 message: 'directory.users.notFound'
             };
             res.json(result);
-        } else if (users.length != emails.length){
+        } else if (users.length != emails.length) {
             var usersNotFound = [];
-            emails.forEach(function(email){
-                var found = users.every(function(user){
+            emails.forEach(function (email) {
+                var found = users.every(function (user) {
                     return (user.email != email);
 
                 });
@@ -120,7 +122,7 @@ exports.editRights = function(req, res){
             };
             res.json(result);
         } else {
-            users.forEach(function (user){
+            users.forEach(function (user) {
                 var found = directory.users.every(function (dirUser, index, dirtUsers) {
                     if (user.id == dirUser.id) {
                         params.users.some(function (paramsUser) {
@@ -137,9 +139,9 @@ exports.editRights = function(req, res){
                     }
                     return true;
                 });
-                if (found){
-                    params.users.some(function(paramsUser){
-                        if (user.email == paramsUser.email){
+                if (found) {
+                    params.users.some(function (paramsUser) {
+                        if (user.email == paramsUser.email) {
                             var userToAdd = {};
                             userToAdd._id = user._id;
                             userToAdd.email = paramsUser.email;
@@ -152,26 +154,7 @@ exports.editRights = function(req, res){
                     });
                 }
             });
-        directory.save(function (saveErr, newDirectory){
-            if (saveErr) {
-                validatorHelper.error(saveErr);
-                result = {
-                    success: false,
-                    errors: saveErr.errors,
-                    message: 'validator.error'
-                };
-            } else {
-                result = {
-                    success: true,
-                    message: 'directory.update.success',
-                    user: jsonMask(newDirectory, Directory.gettables())
-                };
-            }
-            res.json(result);
-        });
-    }
-});
-            directory.save(function (saveErr, newDirectory){
+            directory.save(function (saveErr, newDirectory) {
                 if (saveErr) {
                     validatorHelper.error(saveErr);
                     result = {
