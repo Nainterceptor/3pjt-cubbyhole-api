@@ -37,8 +37,7 @@ module.exports = function (app) {
 
     app.post('/directory/create', isLogged, directory.create);
     app.get('/directory/get-breadcrumb/:directory', isLogged, isOwner, directory.getBreadcrumb);
+    app.delete('/directory/remove/:directory', isLogged, isOwner, directory.remove);
     app.post('/directory/update/:directory', isLogged, isOwner, directory.update);
     app.post('/directory/update/:directory/edit-rights', isLogged, isOwner, directory.editRights);
-    app.post('/directory/update/:directory/updateuser/:id', isLogged, directory.updateUser);
-    app.delete('/directory/update/:directory/removeuser/:id', isLogged, directory.removeUser);
 };

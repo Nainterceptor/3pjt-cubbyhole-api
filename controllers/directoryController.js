@@ -3,7 +3,9 @@ var Directory = mongoose.model('Directory');
 var User = mongoose.model('User');
 var validatorHelper = require('../helpers/validator.js');
 var jsonMask = require('json-mask');
+var Grid = require("gridfs-stream");
 
+var grid = Grid(Directory.db.db, mongoose.mongo);
 
 exports.create = function(req, res) {
     var directory = new Directory(jsonMask(req.body, Directory.settables()));
@@ -34,45 +36,28 @@ exports.create = function(req, res) {
     });
 };
 
-/*exports.getOne = function(req, res) {
- var searchOn = jsonMask(req.query, Directory.searchable());
- //    if (searchOn == null)
- //        searchOn = {};
- //    searchOn.user = jsonMask(req.loggedUser, "_id,email");
- Directory.findOne(searchOn).exec(function(err, doc) {
- var directory = jsonMask(doc, Directory.gettables());
- var result;
- if (directory == null) {
- result = {
- success: false,
- message: 'directory.notFound'
- };
- res.json(result);
- } else {
- doc.getChildren(function (err, children) {
- doc.getAncestors(function (err, ancestors) {
- children.forEach(function(row, index, array) {
- array[index] = jsonMask(row, Directory.gettables());
- });
- ancestors.forEach(function(row, index, array) {
- array[index] = jsonMask(row, Directory.gettables());
- });
- result = {
- success: true,
- message: 'directory.one',
- directory: directory,
- children: children,
- parent: ancestors
- };
- res.json(result);
- });
- });
- }
- });
-
- };*/
+function removeCascade(directory, userId) {
+    directory.getChildren(function (err, children) {
+        children.forEach(function(child) {
+            removeCascade(child);
+        });
+    });
+    directory.remove();
+    var searchOnFiles = {
+        "metadata.users._id": userId,
+        "metadata.directory": directory.id
+    };
+    grid.files.find(searchOnFiles).toArray(function (err, files) {
+        files.forEach(function(file) {
+            grid.remove({'_id': file._id}, function (foo) {
+                console.log(foo);
+            });
+        });
+    });
+}
 
 exports.remove = function(req, res) {
+    removeCascade(req.directory, req.loggedUser._id);
 };
 
 exports.update = function (req, res){
@@ -186,14 +171,6 @@ exports.editRights = function(req, res){
         });
     }
 });
-};
-
-exports.updateUser = function (req, res){
-
-};
-
-exports.removeUser = function (req, res){
-
 };
 
 exports.getBreadcrumb = function (req, res) {
