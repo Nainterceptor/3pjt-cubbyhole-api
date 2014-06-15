@@ -116,7 +116,7 @@ var doDownload = function(req, res, file) {
 };
 
 exports.download = function (req, res) {
-    var id = req.params.id;
+    var id = req.params.file;
     grid.files.findOne({ "_id" : ObjectID(id)}, function (err, file) {
         if (err) {
             res.json({
