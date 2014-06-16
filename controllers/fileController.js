@@ -229,3 +229,88 @@ exports.list = function (req, res) {
         });
     });
 };
+
+exports.editRights = function(req, res) {
+    var params = jsonMask(req.body, Directory.settablesUser());
+    var file = req.file;
+    var filUsers = file.metadata.users;
+    var emails = [];
+    var result;
+    params.users.forEach(function (user) {
+        emails.push(user.email);
+    });
+    User.find({email: {$in: emails}}).exec(function (err, users) {
+        if (users == null) {
+            result = {
+                success: false,
+                message: 'file.users.notFound'
+            };
+            res.json(result);
+        } else if (users.length != emails.length) {
+            var usersNotFound = [];
+            emails.forEach(function (email) {
+                var found = users.every(function (user) {
+                    return (user.email != email);
+
+                });
+                if (found)
+                    usersNotFound.push(email);
+            });
+            result = {
+                success: false,
+                message: 'file.users.notFound',
+                usersNotFound: usersNotFound
+            };
+            res.json(result);
+        } else {
+            users.forEach(function (user) {
+                var found = file.metadata.users.every(function (filUser, index, fileUsers) {
+                    if (user.email == filUser.email) {
+                        params.users.some(function (paramsUser) {
+                            if (user.email == paramsUser.email) {
+                                if (paramsUser.rights != undefined)
+                                    fileUsers[index].rights = paramsUser.rights;
+                                else
+                                    fileUsers.splice(index);
+                                return true;
+                            }
+                            return false;
+                        });
+                        return false;
+                    }
+                    return true;
+                });
+                if (found) {
+                    params.users.some(function (paramsUser) {
+                        if (user.email == paramsUser.email) {
+                            var userToAdd = {};
+                            userToAdd._id = user._id;
+                            userToAdd.email = paramsUser.email;
+                            userToAdd.rights = paramsUser.rights;
+                            filUsers.push(userToAdd);
+                            file.metadata.users.push(userToAdd);
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            });
+            grid.files.update({'_id': file._id}, file,{'w':1},function(saveErr, newFile) {
+                if (saveErr) {
+                    result = {
+                        success: false,
+                        errors: saveErr,
+                        message: 'validator.error'
+                    };
+                } else {
+                    result = {
+                        success: true,
+                        message: 'file.update.success',
+                        user: jsonMask(newFile, Directory.gettables())
+                    };
+                }
+                res.json(result);
+            });
+        }
+    });
+};
