@@ -117,9 +117,8 @@ var doDownload = function(req, res, file) {
         res.end();
     };
     var speed = 25 * 1024;
-    if (req.loggedUser.plan){
-        if (req.loggedUser.plan.bandwidth)
-            speed = req.loggedUser.plan.bandwidth;
+    if ('undefined' != typeof req.loggedUser && 'undefined' != typeof req.loggedUser.plan && 'undefined' != typeof req.loggedUser.plan.bandwidth){
+        speed = req.loggedUser.plan.bandwidth;
     }
     if (speed != 0) {
         var throttle = new Throttle({ bps: speed, chunkSize: file.chunkSize }); //100 Ko/s
@@ -176,8 +175,8 @@ exports.download = function (req, res) {
                 weight: file.length,
                 downloadedAt: new Date()
             });
-            grid.files.save(file, function(err, newFile) {
-                doDownload(req, res, newFile);
+            grid.files.save(file, {w: 1}, function(err, newFile) {
+                doDownload(req, res, file);
             });
         }
     });
