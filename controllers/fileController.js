@@ -44,6 +44,9 @@ exports.upload = function (req, res) {
                             users: [user]
                         }
                     };
+                    if (fields.public){
+                        options.metadata.public = true;
+                    }
                     if (directory != null) {
                         options.metadata.directory = jsonMask(directory, '_id,name');
                         directory.users.forEach(function(userDir){

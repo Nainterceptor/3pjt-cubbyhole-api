@@ -150,3 +150,63 @@ module.exports.transparentLoggedUser = function(req, res, next) {
         }
     });
 };
+
+module.exports.isPublicOrIsLogged = function(req, res, next) {
+    var token = null;
+    if (req.query.token != null)
+        token = req.query.token;
+    else if (req.headers.token != null)
+        token = req.headers.token;
+    else if (req.body.token != null)
+        token = req.body.token;
+    else {
+        var id = req.params.file;
+        grid.files.findOne({ "_id" : ObjectID(id)}, function (err, file) {
+            if (err) {
+                res.json({
+                    success: false,
+                    message: 'file.download.errorMetadata',
+                    errors: err
+                });
+            }
+            if (!file) {
+                res.json({
+                    success: false,
+                    message: 'file.download.notFound'
+                });
+            }
+            if (file.metadata.public)
+                next();
+            else {
+                res.send(403, {
+                    success: false,
+                    message: 'file.download.notPublic'
+                });
+            }
+        });
+    }
+    User.findOne({ token: token }).exec(function(err, user) {
+        if (err)
+            res.send(403, {
+                success: false,
+                message: 'token.searchError',
+                error: err
+            });
+        else if (!user)
+            res.send(403, {
+                success: false,
+                message: 'token.tokenNotFound'
+            });
+        else if (!user.hasValidToken())
+            res.send(403, {
+                success: false,
+                message: 'token.tokenExpired'
+            });
+        else {
+            req.loggedUser = user;
+            req.token = token;
+            next();
+
+        }
+    });
+};

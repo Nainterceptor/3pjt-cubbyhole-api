@@ -10,6 +10,7 @@ module.exports = function (app) {
     var has = auth.has;
     var doubleCheck = auth.doubleCheck;
     var transparentLoggedUser = auth.transparentLoggedUser;
+    var isPublicOrIsLogged = auth.isPublicOrIsLogged;
 
     app.get('/', index.index);
 
@@ -33,7 +34,7 @@ module.exports = function (app) {
     app.post('/file/upload', isLogged, file.upload);
     app.get('/files/list/:directory', isLogged, file.list);
     app.get('/files/list', isLogged, file.list);
-    app.get('/file/download/:file', transparentLoggedUser, file.download);
+    app.get('/file/download/:file', isPublicOrIsLogged, file.download);
     app.delete('/file/remove/:file', isLogged, has('RW+'), file.remove);
 
     app.post('/directory/create', isLogged, directory.create);
