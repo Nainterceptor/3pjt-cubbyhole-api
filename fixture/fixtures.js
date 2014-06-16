@@ -25,22 +25,40 @@ fs.readdir(__dirname+'/fixtures/', function(err, files){
         var path = __dirname+'/fixtures/'+files[i];
         var j = 0;
 
-        if (files[i] === 'users.js'){
+        if (files[i] === 'users.js') {
             var users = require(path).users;
-            for (var k=0; k < users.length; k++){
+            for (k in users) {
                 var user = {};
+                user._id = users[k]._id;
                 user.email = users[k].email;
+                user.plan = users[k].plan;
                 user.salt = makeSalt();
                 user.hashed_password = encryptPassword(users[k].password, user.salt);
                 user.created = Date.now();
-                if (users[k].admin){
+                if (users[k].admin) {
                     user.admin = true;
                 }
-                users[k]=user;
+                users[k] = user;
             }
-            fixtures.clearAndLoad(path, function (){
+            fixtures.clearAndLoad(path, function () {
                 j++;
-                if (j == files.length){
+                if (j == files.length) {
+                    endEvent.emit('end', '\n-- FIN DU MAPPAGE --');
+                }
+            });
+            console.log('\nMappage :');
+            console.log(require(path));
+        } else if (files[i] == 'directories.js') {
+            var directories = require(path).directories;
+            for (l in directories){
+                if (directories[l].parent){
+                    directories[l].parent = directories[directories[l].parent]._id;
+                }
+                directories[l].path = (directories[l].parent?directories[l].parent.toString()+'#':'') + directories[l]._id.toString();
+            }
+            fixtures.clearAndLoad(path, function () {
+                j++;
+                if (j == files.length) {
                     endEvent.emit('end', '\n-- FIN DU MAPPAGE --');
                 }
             });
