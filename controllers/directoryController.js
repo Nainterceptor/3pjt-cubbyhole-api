@@ -45,7 +45,7 @@ function removeCascade(directory, userId) {
     directory.remove();
     var searchOnFiles = {
         "metadata.users._id": userId,
-        "metadata.directory": directory.id
+        "metadata.directory._id": directory._id
     };
     grid.files.find(searchOnFiles).toArray(function (err, files) {
         files.forEach(function(file) {
