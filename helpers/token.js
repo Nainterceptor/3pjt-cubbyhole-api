@@ -180,6 +180,7 @@ module.exports.isPublicOrIsLogged = function(req, res, next) {
                     success: false,
                     message: 'token.tokenNotFound'
                 });
+                return;
             } else {
                 User.findOne({ token: token }).exec(function(err, user) {
                     if (err)
@@ -205,11 +206,13 @@ module.exports.isPublicOrIsLogged = function(req, res, next) {
 
                     }
                 });
+                return;
             }
             res.send(403, {
                 success: false,
                 message: 'file.download.notPublic'
             });
+            return;
         }
     });
 };
