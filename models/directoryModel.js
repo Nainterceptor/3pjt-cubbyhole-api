@@ -33,7 +33,7 @@ directorySchema.statics = {
         return 'name,parent';
     },
     settablesUser: function() {
-        return 'users/*';
+        return 'users/*,public';
     }
 };
 require('../validators/directoryValidator.js')(directorySchema);
