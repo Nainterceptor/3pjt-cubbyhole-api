@@ -236,43 +236,27 @@ exports.editRights = function(req, res) {
     var filUsers = file.metadata.users;
     var emails = [];
     var result;
-    if (params.public){
+    file.metadata.public = false;
+    if (null !== params && params.public == 'true') {
         file.metadata.public = true;
-        grid.files.update({'_id': file._id}, file,{'w':1},function(saveErr, newFile) {
-            if (saveErr) {
-                result = {
-                    success: false,
-                    errors: saveErr,
-                    message: 'validator.error'
-                };
-            } else {
-                result = {
-                    success: true,
-                    message: 'file.update.success',
-                    user: jsonMask(newFile, Directory.gettables())
-                };
-            }
-            res.json(result);
-        });
-    } else {
-        file.metadata.public = false;
-        grid.files.update({'_id': file._id}, file,{'w':1},function(saveErr, newFile) {
-            if (saveErr) {
-                result = {
-                    success: false,
-                    errors: saveErr,
-                    message: 'validator.error'
-                };
-            } else {
-                result = {
-                    success: true,
-                    message: 'file.update.success',
-                    user: jsonMask(newFile, Directory.gettables())
-                };
-            }
-            res.json(result);
-        });
     }
+    grid.files.update({'_id': file._id}, file,{'w':1},function(saveErr, newFile) {
+        if (saveErr) {
+            result = {
+                success: false,
+                errors: saveErr,
+                message: 'validator.error'
+            };
+        } else {
+            result = {
+                success: true,
+                message: 'file.update.success',
+                user: jsonMask(newFile, Directory.gettables())
+            };
+        }
+        res.json(result);
+    });
+    return;
     params.users.forEach(function (user) {
         emails.push(user.email);
     });
@@ -354,7 +338,7 @@ exports.editRights = function(req, res) {
 
 exports.getMetadatas = function (req, res) {
     var file = req.file;
-    var fileFiltered = jsonMask(file, '_id,filename,length,contentType,uploadDate,md5,metadata/users');
+    var fileFiltered = jsonMask(file, '_id,filename,length,contentType,uploadDate,md5,metadata/*');
     res.json({
         success: true,
         message: 'file.get',
