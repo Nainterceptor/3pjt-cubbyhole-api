@@ -351,3 +351,13 @@ exports.editRights = function(req, res) {
         }
     });
 };
+
+exports.getMetadatas = function (req, res) {
+    var file = req.file;
+    var fileFiltered = jsonMask(file, '_id,filename,length,contentType,uploadDate,md5,metadata/users');
+    res.json({
+        success: true,
+        message: 'file.get',
+        file: fileFiltered
+    });
+};

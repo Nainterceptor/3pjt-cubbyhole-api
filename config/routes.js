@@ -37,6 +37,7 @@ module.exports = function (app) {
     app.get('/file/download/:file', isPublicOrIsLogged, file.download);
     app.delete('/file/remove/:file', isLogged, has('RW+'), file.remove);
     app.post('/file/update/:file/edit-rights', isLogged, has('RW+'), file.editRights);
+    app.get('/file/get/:file', isLogged, has('R'), file.getMetadatas);
 
     app.post('/directory/create', isLogged, directory.create);
     app.get('/directory/get-breadcrumb/:directory', isLogged, has('R'), directory.getBreadcrumb);
